@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from patsy import dmatrix
 from prettytable import PrettyTable
-import toolz
+from zbox import toolz as tz
 
 from . import util
 from ..exceptions import ModelEvaluationError
@@ -712,7 +712,7 @@ class MNLDiscreteChoiceModel(DiscreteChoiceModel):
         Columns from the choosers table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             util.columns_in_filters(self.choosers_predict_filters),
             util.columns_in_filters(self.choosers_fit_filters))))
 
@@ -721,7 +721,7 @@ class MNLDiscreteChoiceModel(DiscreteChoiceModel):
         Columns from the alternatives table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             util.columns_in_filters(self.alts_predict_filters),
             util.columns_in_filters(self.alts_fit_filters))))
 
@@ -732,7 +732,7 @@ class MNLDiscreteChoiceModel(DiscreteChoiceModel):
         alternatives tables.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             util.columns_in_filters(self.interaction_predict_filters),
             util.columns_in_formula(self.model_expression))))
 
@@ -742,7 +742,7 @@ class MNLDiscreteChoiceModel(DiscreteChoiceModel):
         the choosers or alternatives tables.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             self.choosers_columns_used(),
             self.alts_columns_used(),
             self.interaction_columns_used())))
@@ -1128,8 +1128,8 @@ class MNLDiscreteChoiceModelGroup(DiscreteChoiceModel):
             probs.append(
                 self.models[name].summed_probabilities(df, alternatives))
 
-        add = toolz.curry(pd.Series.add, fill_value=0)
-        probs = toolz.reduce(add, probs)
+        add = tz.curry(pd.Series.add, fill_value=0)
+        probs = tz.reduce(add, probs)
 
         logger.debug(
             'finish: calculate summed probabilities in LCM group {}'.format(
@@ -1180,7 +1180,7 @@ class MNLDiscreteChoiceModelGroup(DiscreteChoiceModel):
         Columns from the choosers table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concat(
+        return list(tz.unique(tz.concat(
             m.choosers_columns_used() for m in self.models.values())))
 
     def alts_columns_used(self):
@@ -1188,7 +1188,7 @@ class MNLDiscreteChoiceModelGroup(DiscreteChoiceModel):
         Columns from the alternatives table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concat(
+        return list(tz.unique(tz.concat(
             m.alts_columns_used() for m in self.models.values())))
 
     def interaction_columns_used(self):
@@ -1198,7 +1198,7 @@ class MNLDiscreteChoiceModelGroup(DiscreteChoiceModel):
         alternatives tables.
 
         """
-        return list(toolz.unique(toolz.concat(
+        return list(tz.unique(tz.concat(
             m.interaction_columns_used() for m in self.models.values())))
 
     def columns_used(self):
@@ -1207,7 +1207,7 @@ class MNLDiscreteChoiceModelGroup(DiscreteChoiceModel):
         the choosers or alternatives tables.
 
         """
-        return list(toolz.unique(toolz.concat(
+        return list(tz.unique(tz.concat(
             m.columns_used() for m in self.models.values())))
 
 
@@ -1713,7 +1713,7 @@ class SegmentedMNLDiscreteChoiceModel(DiscreteChoiceModel):
         Columns from the choosers table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             util.columns_in_filters(self.choosers_predict_filters),
             util.columns_in_filters(self.choosers_fit_filters))))
 
@@ -1722,7 +1722,7 @@ class SegmentedMNLDiscreteChoiceModel(DiscreteChoiceModel):
         Columns from the alternatives table that are used for filtering.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             util.columns_in_filters(self.alts_predict_filters),
             util.columns_in_filters(self.alts_fit_filters))))
 
@@ -1741,7 +1741,7 @@ class SegmentedMNLDiscreteChoiceModel(DiscreteChoiceModel):
         the choosers or alternatives tables.
 
         """
-        return list(toolz.unique(toolz.concatv(
+        return list(tz.unique(tz.concatv(
             self.choosers_columns_used(),
             self.alts_columns_used(),
             self.interaction_columns_used(),
