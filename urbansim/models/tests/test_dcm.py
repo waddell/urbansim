@@ -154,14 +154,16 @@ def test_mnl_dcm(seed, basic_dcm, choosers, alternatives):
 
     sprobs = basic_dcm.summed_probabilities(choosers, alternatives)
     assert len(sprobs) == len(filtered_alts)
-    pdt.assert_index_equal(sprobs.index, filtered_alts.index)
+    pdt.assert_index_equal(
+        sprobs.index, filtered_alts.index, check_names=False)
     npt.assert_allclose(sprobs.sum(), len(filtered_choosers))
 
     choices = basic_dcm.predict(choosers.iloc[1:], alternatives)
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['b', 'j', 'g'], index=[1, 3, 4]))
+        pd.Series(
+            ['h', 'c', 'f'], index=pd.Index([1, 3, 4], name='chooser_id')))
 
     # check that we can do a YAML round-trip
     yaml_str = basic_dcm.to_yaml()
@@ -243,7 +245,6 @@ def test_mnl_dcm_yaml(basic_dcm, choosers, alternatives):
 
 def test_mnl_dcm_prob_mode_single(seed, basic_dcm_fit, choosers, alternatives):
     basic_dcm_fit.probability_mode = 'single_chooser'
-    basic_dcm_fit.choice_mode = 'aggregate'
 
     filtered_choosers, filtered_alts = basic_dcm_fit.apply_predict_filters(
         choosers, alternatives)
@@ -253,28 +254,28 @@ def test_mnl_dcm_prob_mode_single(seed, basic_dcm_fit, choosers, alternatives):
     pdt.assert_series_equal(
         probs,
         pd.Series(
-            [0.33709756,
-             0.23459563,
-             0.16326167,
-             0.11361837,
-             0.05502717,
-             0.03829495,
-             0.02665053,
-             0.01854685,
-             0.01290727],
+            [0.25666709612190147,
+             0.20225620916965448,
+             0.15937989234214262,
+             0.1255929308043417,
+             0.077988133629030815,
+             0.061455420294827229,
+             0.04842747874412457,
+             0.038161332007195688,
+             0.030071506886781514],
             index=pd.MultiIndex.from_product(
                 [[1], filtered_alts.index.values],
-                names=['chooser_ids', 'alternative_ids'])))
+                names=['chooser_id', 'alternative_id'])))
 
     sprobs = basic_dcm_fit.summed_probabilities(choosers, alternatives)
-    pdt.assert_index_equal(sprobs.index, filtered_alts.index)
+    pdt.assert_index_equal(
+        sprobs.index, filtered_alts.index, check_names=False)
     npt.assert_allclose(sprobs.sum(), len(filtered_choosers))
 
 
 def test_mnl_dcm_prob_mode_single_prediction_sample_size(
         seed, basic_dcm_fit, choosers, alternatives):
     basic_dcm_fit.probability_mode = 'single_chooser'
-    basic_dcm_fit.choice_mode = 'aggregate'
     basic_dcm_fit.prediction_sample_size = 5
 
     filtered_choosers, filtered_alts = basic_dcm_fit.apply_predict_filters(
@@ -285,18 +286,19 @@ def test_mnl_dcm_prob_mode_single_prediction_sample_size(
     pdt.assert_series_equal(
         probs,
         pd.Series(
-            [0.06805838,
-             0.20192435,
-             0.022939,
-             0.29015121,
-             0.41692705],
+            [0.11137766,
+             0.05449957,
+             0.14134044,
+             0.22761617,
+             0.46516616],
             index=pd.MultiIndex.from_product(
-                [[1], ['f', 'c', 'i', 'b', 'a']],
-                names=['chooser_ids', 'alternative_ids'])))
+                [[1], ['g', 'j', 'f', 'd', 'a']],
+                names=['chooser_id', 'alternative_id'])))
 
     sprobs = basic_dcm_fit.summed_probabilities(choosers, alternatives)
     pdt.assert_index_equal(
-        sprobs.index, pd.Index(['j', 'b', 'g', 'h', 'd']))
+        sprobs.index,
+        pd.Index(['d', 'g', 'a', 'c', 'd'], name='alternative_id'))
     npt.assert_allclose(sprobs.sum(), len(filtered_choosers))
 
 
@@ -313,7 +315,8 @@ def test_mnl_dcm_prob_mode_full_prediction_sample_size(
     npt.assert_allclose(probs.sum(), len(filtered_choosers) - 1)
 
     sprobs = basic_dcm_fit.summed_probabilities(choosers, alternatives)
-    pdt.assert_index_equal(sprobs.index, filtered_alts.index)
+    pdt.assert_index_equal(
+        sprobs.index, filtered_alts.index, check_names=False)
     npt.assert_allclose(sprobs.sum(), len(filtered_choosers))
 
 
@@ -328,7 +331,7 @@ def test_mnl_dcm_choice_mode_agg(seed, basic_dcm_fit, choosers, alternatives):
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['a', 'c', 'b', 'd'], index=[0, 1, 3, 4]))
+        pd.Series(['f', 'a', 'd', 'c'], index=[0, 1, 3, 4]))
 
 
 def test_mnl_dcm_group(seed, grouped_choosers, alternatives):
@@ -368,14 +371,17 @@ def test_mnl_dcm_group(seed, grouped_choosers, alternatives):
 
     sprobs = group.summed_probabilities(grouped_choosers, alternatives)
     assert len(sprobs) == len(filtered_alts)
-    pdt.assert_index_equal(sprobs.index, filtered_alts.index)
+    pdt.assert_index_equal(
+        sprobs.index, filtered_alts.index, check_names=False)
 
     choice_state = np.random.get_state()
     choices = group.predict(grouped_choosers, alternatives)
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['c', 'e', 'c', 'i'], index=[0, 3, 1, 4]))
+        pd.Series(
+            ['c', 'a', 'a', 'g'],
+            index=pd.Index([0, 3, 1, 4], name='chooser_id')))
 
     # check that we don't get the same alt twice if they are removed
     # make sure we're starting from the same random state as the last draw
@@ -385,7 +391,9 @@ def test_mnl_dcm_group(seed, grouped_choosers, alternatives):
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['c', 'e', 'd', 'i'], index=[0, 3, 1, 4]))
+        pd.Series(
+            ['c', 'a', 'b', 'g'],
+            index=pd.Index([0, 3, 1, 4], name='chooser_id')))
 
 
 def test_mnl_dcm_segmented_raises():
@@ -443,14 +451,17 @@ def test_mnl_dcm_segmented(seed, grouped_choosers, alternatives):
 
     sprobs = group.summed_probabilities(grouped_choosers, alternatives)
     assert len(sprobs) == len(alternatives)
-    pdt.assert_index_equal(sprobs.index, alternatives.index)
+    pdt.assert_index_equal(
+        sprobs.index, alternatives.index, check_names=False)
 
     choice_state = np.random.get_state()
     choices = group.predict(grouped_choosers, alternatives)
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['c', 'b', 'i', 'b', 'j'], index=[0, 2, 3, 1, 4]))
+        pd.Series(
+            ['c', 'a', 'b', 'a', 'j'],
+            index=pd.Index([0, 2, 3, 1, 4], name='chooser_id')))
 
     # check that we don't get the same alt twice if they are removed
     # make sure we're starting from the same random state as the last draw
@@ -460,7 +471,9 @@ def test_mnl_dcm_segmented(seed, grouped_choosers, alternatives):
 
     pdt.assert_series_equal(
         choices,
-        pd.Series(['c', 'b', 'i', 'a', 'j'], index=[0, 2, 3, 1, 4]))
+        pd.Series(
+            ['c', 'a', 'b', 'd', 'j'],
+            index=pd.Index([0, 2, 3, 1, 4], name='chooser_id')))
 
 
 def test_mnl_dcm_segmented_yaml(grouped_choosers, alternatives):

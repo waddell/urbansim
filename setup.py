@@ -17,10 +17,10 @@ setup(
     version='1.4dev',
     description='Tool for modeling metropolitan real estate markets',
     long_description=long_description,
-    author='Synthicity',
-    author_email='ffoti@synthicity.com',
+    author='Autodesk',
+    author_email='udst@autodesk.com',
     license='BSD',
-    url='https://github.com/synthicity/urbansim',
+    url='https://github.com/udst/urbansim',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 2.7',
@@ -34,6 +34,7 @@ setup(
         'bottle>=0.12',
         'matplotlib>=1.3.1',
         'numpy>=1.8.0',
+        'orca>=1.1',
         'pandas>=0.13.1',
         'patsy>=0.2.1',
         'prettytable>=0.7.2',
@@ -42,7 +43,8 @@ setup(
         'simplejson>=3.3',
         'statsmodels>=0.5.0',
         'tables>=3.1.0',
-        'toolz>=0.7.0'
+        'toolz>=0.7.0',
+        'zbox>=1.2'
     ],
     extras_require={
         'pandana': ['pandana>=0.1']
